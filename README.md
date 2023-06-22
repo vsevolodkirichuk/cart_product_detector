@@ -4,6 +4,6 @@
 ```git clone https://github.com/kariboter/cart_product_detector.git```
 # Как запускать
 ```
-pip3 install requirments.txt
+pip3 install -r requirments.txt
 python3 product_detecting.py
 ```
