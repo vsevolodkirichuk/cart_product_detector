@@ -1,8 +1,9 @@
 import cv2
 import torch
+import numpy as np
 
-args = {'embeddings_path': 'embeddings',
-        'model_path': 'model'}
+args = {'embeddings_path': 'data/embeddings',
+        'model_path': 'data/model'}
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
@@ -40,7 +41,8 @@ def preprocess(img):
     img[..., 0] /= std[0]
     img[..., 1] /= std[1]
     img[..., 2] /= std[2]
-    return img
+    im = img[..., ::-1].transpose((2, 0, 1))
+    return np.ascontiguousarray(im)
 
 
 def main(args: dict):
@@ -55,7 +57,7 @@ def main(args: dict):
         ret, frame = cap.read()
         if ret == True:
             inputs = preprocess(frame)
-            tensor_input = torch.Tensor(inputs).view(3, 254, 254)  # resizing image for torch model
+            tensor_input = torch.Tensor(inputs)  # resizing image for torch model
             with torch.no_grad():
                 curr_embedding = model(tensor_input[None, ...].to('cuda')).to('cpu')
             dists = {label: sum([pdist(curr_embedding, emb) for emb in embeddings[label]]) / len(embeddings[label]) for
@@ -63,7 +65,7 @@ def main(args: dict):
             min_dist = min(dists.values())
             top_label = [label for label in dists if dists[label] == min_dist]
             print(top_label)
-            cv2.imshow('Frame', inputs)
+            cv2.imshow('Frame', frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
         else:
