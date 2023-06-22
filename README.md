@@ -7,3 +7,7 @@
 pip3 install -r requirments.txt
 python3 product_detecting.py
 ```
+если программа запускается с операционной системы windows
+``` 
+py product_detecting.py
+```
