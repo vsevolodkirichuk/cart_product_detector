@@ -1,9 +1,13 @@
 import cv2
+import argparse
 import torch
 import numpy as np
 
-args = {'embeddings_path': 'data/embeddings',
-        'model_path': 'data/model'}
+parser = argparse.ArgumentParser()
+parser.add_argument('-embeddings_path', type=str, default='data/embeddings')
+parser.add_argument('-model_path', type=str, default='data/model')
+args = parser.parse_args()
+
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
@@ -42,22 +46,21 @@ def preprocess(img):
     img[..., 1] /= std[1]
     img[..., 2] /= std[2]
     im = img[..., ::-1].transpose((2, 0, 1))
-    return np.ascontiguousarray(im)
+    return torch.Tensor(np.ascontiguousarray(im))
 
 
 def main(args: dict):
     cap = cv2.VideoCapture(0)
-
-    model = torch.load(args['model_path'])
+    
+    model = torch.load(args.model_path)
     model.to('cuda').eval()
-    embeddings = torch.load(args['embeddings_path'])  # embedding for comparing
+    embeddings = torch.load(args.embeddings_path)  # embedding for comparing
 
     pdist = torch.nn.PairwiseDistance(p=4)
     while (cap.isOpened()):
         ret, frame = cap.read()
         if ret == True:
-            inputs = preprocess(frame)
-            tensor_input = torch.Tensor(inputs)  # resizing image for torch model
+            tensor_input = preprocess(frame)
             with torch.no_grad():
                 curr_embedding = model(tensor_input[None, ...].to('cuda')).to('cpu')
             dists = {label: sum([pdist(curr_embedding, emb) for emb in embeddings[label]]) / len(embeddings[label]) for

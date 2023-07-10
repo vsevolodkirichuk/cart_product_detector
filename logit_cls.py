@@ -1,10 +1,13 @@
+import argparse
 import torch
-import pickle
 import cv2
 import numpy as np
 
-args = {'labels_path': 'data/keys.json',
-        'model_path': 'data/model_logit_cls'}
+parser = argparse.ArgumentParser()
+parser.add_argument('-labels_path', type=str, default='data/keys.pt')
+parser.add_argument('-model_path', type=str, default='data/model_logit_cls')
+args = parser.parse_args()
+
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
@@ -42,24 +45,22 @@ def preprocess(img):
     img[..., 1] /= std[1]
     img[..., 2] /= std[2]
     im = img[..., ::-1].transpose((2, 0, 1))
-    return np.ascontiguousarray(im)
+    return torch.Tensor(np.ascontiguousarray(im))
 
 def main(args: dict):
     cap = cv2.VideoCapture(0)
 
-    model = torch.load(args['model_path'])
+    model = torch.load(args.model_path)
     model.to('cuda').eval()
-    with open(args['labels_path'], "rb") as fp:   # Unpickling
-        labels = pickle.load(fp)
+    labels = torch.load(args.labels_path)
 
     while (cap.isOpened()):
         ret, frame = cap.read()
         if ret == True:
-            inputs = preprocess(frame)
-            tensor_input = torch.Tensor(inputs)  # resizing image for torch model
+            tensor_input = preprocess(frame)
             with torch.no_grad():
                 logits = model(tensor_input[None, ...].to('cuda')).to('cpu')
-            print(labels[torch.argmax(logits, dim=1)].item())
+            print(labels[torch.argmax(logits, dim=1).item()])
             cv2.imshow('Frame', frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
