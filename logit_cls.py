@@ -15,7 +15,7 @@ def center_crop(img, dim):
     """Returns center cropped image
     Args:
     img: image to be center cropped
-    dim: dimensions (width, height) to be cropped
+    dim: dimensions (width, height) to be cropped.
     """
     width, height = img.shape[1], img.shape[0]
     # process crop width and height for max available dimension
