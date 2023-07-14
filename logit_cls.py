@@ -14,7 +14,7 @@ std = [0.229, 0.224, 0.225]
 def center_crop(img, dim):
     """Returns center cropped image
     Args:
-    img: image to be center cropped
+    img: image to be center cropped   #
     dim: dimensions (width, height) to be cropped.
     """
     width, height = img.shape[1], img.shape[0]
