@@ -1,4 +1,4 @@
-from transformers import AutoFeatureExtractor, AutoModelForObjectDetection   ##
+from transformers import AutoFeatureExtractor, AutoModelForObjectDetection
 import argparse
 import torch
 import cv2
