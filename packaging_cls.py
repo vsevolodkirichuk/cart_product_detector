@@ -1,4 +1,4 @@
-from transformers import AutoFeatureExtractor, AutoModelForObjectDetection
+from transformers import AutoFeatureExtractor, AutoModelForObjectDetection   ##
 import argparse
 import torch
 import cv2
@@ -6,10 +6,10 @@ import numpy as np
 from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-labels_path', type=str, default='data/keys.pt')
-parser.add_argument('-model_path', type=str, default='data/model_packaging')
-parser.add_argument('-od_model_path', type=str, default='C:/Deep Learning/cart_product_detector/data/od_model__packaging/od_model__packaging')
-parser.add_argument('-extractor_path', type=str, default='C:/Deep Learning/cart_product_detector/data/extractor_packaging/extractor_packaging')
+parser.add_argument('--labels_path', type=str, default='data/keys.pt')
+parser.add_argument('--model_path', type=str, default='data/model_packaging')
+parser.add_argument('--od_model_path', type=str, default='C:/Deep Learning/cart_product_detector/data/od_model__packaging/od_model__packaging')
+parser.add_argument('--extractor_path', type=str, default='C:/Deep Learning/cart_product_detector/data/extractor_packaging/extractor_packaging')
 args = parser.parse_args()
 
 mean = [0.485, 0.456, 0.406]
@@ -54,7 +54,6 @@ def preprocess(img):
 def main(args: dict):
     cap = cv2.VideoCapture(0)
 
-    access_token = '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'
     od_model = AutoModelForObjectDetection.from_pretrained(args.od_model_path, local_files_only=True)
     od_model.to('cuda').eval()
     labels = torch.load(args.labels_path)
