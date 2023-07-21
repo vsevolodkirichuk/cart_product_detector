@@ -1,8 +1,8 @@
-from transformers import AutoFeatureExtractor, AutoModelForObjectDetection ##
+from transformers import AutoFeatureExtractor, AutoModelForObjectDetection
 import argparse
 import torch
 import cv2
-import numpy as npgit commi
+import numpy as np
 from PIL import Image
 
 parser = argparse.ArgumentParser()
