@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--labels_path', type=str, default='data/keys.pt')
-parser.add_argument('--cls_path', type=str, default='data/model_yolobased_cls')
-parser.add_argument('--od_model_path', type=str, default='data/yolo.pt')
+parser.add_argument('--labels_path', type=str, default='data/keys_yolo.pt')
+parser.add_argument('--task_type', type=str, default='video')
+parser.add_argument('--od_model_path', type=str, default='data/best.pt')
 args = parser.parse_args()
 
 mean = [0.485, 0.456, 0.406]
@@ -56,9 +56,9 @@ def get_bboxes(bb:list, width:int, height:int)->list:
     return [int(i) for i in bb[:4]]
 
 def main(args: dict):
-    cap = cv2.VideoCapture(0)
+    if args.task_type == 'video': cap = cv2.VideoCapture('C:/Deep Learning/cart_product_detector/data/videos/IMG_0991.MOV')
+    else: cap = cv2.VideoCapture(0)
     yolo = torch.hub.load('ultralytics/yolov5', 'custom', path=args.od_model_path)
-    cls = torch.load(args.cls_path).to('cuda')
     labels = torch.load(args.labels_path)
     #print(labels)
     while (cap.isOpened()):
@@ -67,15 +67,14 @@ def main(args: dict):
         if ret == True:
             bb = yolo(frame).xyxyn[0].cpu().tolist()
             if len(bb) > 0:
-                bb = bb[0]
-                width, height = frame.shape[1], frame.shape[0]
-                bb = get_bboxes(bb, width, height)
-                cropped = frame[bb[1]:bb[3], bb[0]:bb[2]]
-                cv2.imshow('Cropped', cropped)
-                input_tensor = preprocess(cropped).to('cuda')
-                with torch.no_grad():
-                    logits = cls(input_tensor[None, ...])
-                print(labels[torch.argmax(logits, dim=1).item()])
+                for box in bb:
+                    pred = box[-len(labels):]
+                    label = labels[pred.index(max(pred))]
+                    print(label)
+                    width, height = frame.shape[1], frame.shape[0]
+                    cords = get_bboxes(box, width, height)
+                    cropped = frame[cords[1]:cords[3], cords[0]:cords[2]]
+                    cv2.imshow('Cropped', cropped)
             cv2.imshow('Frame', frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
